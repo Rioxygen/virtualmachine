@@ -1,6 +1,12 @@
 # Ambiente de desarrollo
 Este proyecto consta de una serie de scripts para levantar un servidor virtual con una configuracion no monolitica, la idea es que los desarrolladores empiecen a pensar en que sus desarrollos no van a ir enfocados a un solo nodo, si no a multiples, especialmente en empresas grandes donde su infraestructura es mas robusta.
 
+## Versiones
+Se recomienda:
+
+        Vagrant 2.*
+        Puppet  4.*
+
 ## Requerimientos
 
 Para usar este proyecto es necesario tener instalado lo siguiente:
