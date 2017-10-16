@@ -20,12 +20,12 @@ Para hacer accesibles las paginas publicadas por el servidor virtual, necesitamo
 las siguientes lineas en el archivo hosts (/etc/hosts en linux y mac, 
 C:\windows\system32\drivers\etc\hosts para windows )
 
-    192.168.86.10 www.wrappergraylogzendlogger.local.com
+    192.168.66.10 www.wrappergraylogzendlogger.local.com
 
 Es importante comentar que la resolucion de nombres, esta en cada uno de los servidores y responden a la siguiente manera:
 
-    192.168.86.11 magentotraining.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
-    192.168.86.11 magento2training.local.com
+    192.168.66.10 magentotraining.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
+    192.168.66.10 magento2training.local.com
 
 ## Modo de uso
 Una vez que tenemos la configuración correcta podemos manipular el servidor virtual desde la linea de comandos

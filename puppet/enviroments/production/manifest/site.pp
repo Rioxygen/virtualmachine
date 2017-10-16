@@ -18,9 +18,9 @@ class pckgsextra{
         group => "root",
         mode  => "644",
         content => "
-        192.168.100.11  www.proyecto.local.com
-        192.168.100.11  www.coreproyecto.local.com
-        192.168.100.11  www.maqueta.local.com
+        192.168.66.10  www.wrappergraylogzendlogger.local.com
+        192.168.66.10  magentotraining.local.com
+        192.168.66.10  magento2training.local.com
         ",
     }
 }
