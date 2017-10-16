@@ -131,6 +131,37 @@ class appsrv {
         mode   => "777"
     }
 }
+##*************Configuracion Core Proeycto*************###
+class zendloggergraylog {
+    require websrv
+    require appsrv
+    nginx::resource::vhost { 'wrappergraylogzendlogger.local.com':
+        www_root            => '/www/wrappergraylogzendlogger.local.com',
+        ssl                 => true,
+        ssl_cert            => '/vagrant/puppet/certs/server.crt',
+        ssl_key             => '/vagrant/puppet/certs/server.key',
+        index_files         => [ 'index.php' ],
+        use_default_location => true
+    }
+    nginx::resource::location { "zendloggergraylog_root":
+        ensure          => present,
+        ssl             => true,
+        vhost           => 'wrappergraylogzendlogger.local.com',
+        www_root        => '/www/wrappergraylogzendlogger.local.com',
+        location        => '~ \.php$',
+        index_files     => ['index.php'],
+        proxy           => undef,
+        fastcgi         => "127.0.0.1:9001",
+        fastcgi_script  => undef,
+        location_cfg_append => {
+            fastcgi_connect_timeout => '5h',
+            fastcgi_read_timeout    => '5h',
+            fastcgi_send_timeout    => '5h',
+            fastcgi_param    => "APPLICATION_ENV 'development'"
+        }
+    }
+    
+}
 #### **** COMPOSER **** ###
 class pckgcomposer{
     require appsrv
@@ -185,6 +216,7 @@ class pckgnode{
 ###
 include pckgsextra
 include appsrv
+include zendloggergraylog
 include pckgmemcached
 include pckgnode
 #include pckgsass

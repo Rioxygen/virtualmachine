@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.memory = "382"
   end
   #Wrapper
-  config.vm.synced_folder "../WrapperGrayLogZendLogger", "/www/wrappergraylogzendlogger.com", disabled: (not FileTest::directory?("../WrapperGrayLogZendLogger"))
+  config.vm.synced_folder "../WrapperGrayLogZendLogger", "/www/wrappergraylogzendlogger.local.com", disabled: (not FileTest::directory?("../WrapperGrayLogZendLogger"))
   #Magento1
   config.vm.synced_folder "../magentoTraining", "/www/magentotraining.local.com", disabled: (not FileTest::directory?("../magentoTraining"))
   #Magento2
