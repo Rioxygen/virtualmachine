@@ -162,6 +162,41 @@ class zendloggergraylog {
     }
     
 }
+
+##*************Magento 1********************************
+class magento1 {
+    require websrv
+    require appsrv
+
+    nginx::resource::vhost { 'magentotraining.local.com':
+        www_root                => '/www/magentotraining.local.com',
+        ssl                     => true,
+        ssl_cert                => '/vagrant/puppet/certs/server.crt',
+        ssl_key                 => '/vagrant/puppet/certs/server.key',
+        index_files             => [ 'index.php' ],
+        use_default_location    => true,
+        location_cfg_append => {
+            try_files => '$uri $uri/ /index.php$is_args$args'
+        }
+    }
+    nginx::resource::location { "magento1_root":
+        ensure          => present,
+        ssl              => true,
+        vhost           => 'magentotraining.local.com',
+        www_root        => '/www/magentotraining.local.com',
+        location        => '~ \.php$',
+        index_files     => ['index.php'],
+        proxy           => undef,
+        fastcgi         => "127.0.0.1:9001",
+        fastcgi_script  => undef,
+        location_cfg_append => {
+            fastcgi_connect_timeout => '5h',
+            fastcgi_read_timeout    => '5h',
+            fastcgi_send_timeout    => '5h',
+            fastcgi_param    => "APPLICATION_ENV 'development'"
+        }
+    }
+}
 #### **** COMPOSER **** ###
 class pckgcomposer{
     require appsrv
@@ -217,6 +252,7 @@ class pckgnode{
 include pckgsextra
 include appsrv
 include zendloggergraylog
+include magento1
 include pckgmemcached
 include pckgnode
 #include pckgsass

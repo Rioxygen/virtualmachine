@@ -5,14 +5,14 @@ Este proyecto consta de una serie de scripts para levantar un servidor virtual c
 Se recomienda:
 
         Vagrant 2.*
-        Puppet  4.*
+        VirtualBox 5.*
 
 ## Requerimientos
 
 Para usar este proyecto es necesario tener instalado lo siguiente:
 
-* virtualbox
-* vagrant
+* virtualbox 5.*
+* vagrant 2.*
 * putty (en caso de estar usando windows)
 
 
@@ -21,11 +21,21 @@ las siguientes lineas en el archivo hosts (/etc/hosts en linux y mac,
 C:\windows\system32\drivers\etc\hosts para windows )
 
     192.168.66.10 www.wrappergraylogzendlogger.local.com
+    192.168.66.10 magentotraining.local.com
+    192.168.66.10 magento2training.local.com
 
 Es importante comentar que la resolucion de nombres, esta en cada uno de los servidores y responden a la siguiente manera:
-
-    192.168.66.10 magentotraining.local.com (No agregar al /etc/hosts, cuenta con restricciones de firewall)
-    192.168.66.10 magento2training.local.com
+        
+        -virtualmachine
+            --vagrant
+            --puppet
+        -magento1
+            -
+            -
+        -magento2
+            -
+            -
+        -WrapperGrayLogZendLogger
 
 ## Modo de uso
 Una vez que tenemos la configuración correcta podemos manipular el servidor virtual desde la linea de comandos
