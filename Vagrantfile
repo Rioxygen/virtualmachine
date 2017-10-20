@@ -22,6 +22,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../magentoTraining", "/www/magentotraining.local.com", disabled: (not FileTest::directory?("../magentoTraining"))
   #Magento2
   config.vm.synced_folder "../magento2Training", "/www/magento2training.local.com", disabled: (not FileTest::directory?("../magento2Training"))
+  #Magento2
+  config.vm.synced_folder "../cocacola", "/www/cocacola.local.com", disabled: (not FileTest::directory?("../cocacola"))
+  #Magento2
+  config.vm.synced_folder "../kokatu", "/www/kokatu.local.com", disabled: (not FileTest::directory?("../kokatu"))
   #Aprovisionamiento
   config.vm.provision :shell do |shell|
         shell.path      = "vagrant/bootstrap.sh"

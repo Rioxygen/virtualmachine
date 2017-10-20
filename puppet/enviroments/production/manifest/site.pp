@@ -197,6 +197,74 @@ class magento1 {
         }
     }
 }
+##*************Magento 12********************************
+class magento2 {
+    require websrv
+    require appsrv
+
+    nginx::resource::vhost { 'magentotraining2.local.com':
+        www_root                => '/www/magentotraining2.local.com',
+        ssl                     => true,
+        ssl_cert                => '/vagrant/puppet/certs/server.crt',
+        ssl_key                 => '/vagrant/puppet/certs/server.key',
+        index_files             => [ 'index.php' ],
+        use_default_location    => true,
+        location_cfg_append => {
+            try_files => '$uri $uri/ /index.php$is_args$args'
+        }
+    }
+    nginx::resource::location { "magento2_root":
+        ensure          => present,
+        ssl              => true,
+        vhost           => 'magentotraining2.local.com',
+        www_root        => '/www/magentotraining2.local.com',
+        location        => '~ \.php$',
+        index_files     => ['index.php'],
+        proxy           => undef,
+        fastcgi         => "127.0.0.1:9001",
+        fastcgi_script  => undef,
+        location_cfg_append => {
+            fastcgi_connect_timeout => '5h',
+            fastcgi_read_timeout    => '5h',
+            fastcgi_send_timeout    => '5h',
+            fastcgi_param    => "APPLICATION_ENV 'development'"
+        }
+    }
+}
+##*************Magento 12********************************
+class cocacola {
+    require websrv
+    require appsrv
+
+    nginx::resource::vhost { 'cocacola.local.com':
+        www_root                => '/www/cocacola.local.com',
+        ssl                     => true,
+        ssl_cert                => '/vagrant/puppet/certs/server.crt',
+        ssl_key                 => '/vagrant/puppet/certs/server.key',
+        index_files             => [ 'index.php' ],
+        use_default_location    => true,
+        location_cfg_append => {
+            try_files => '$uri $uri/ /index.php$is_args$args'
+        }
+    }
+    nginx::resource::location { "cocacola_root":
+        ensure          => present,
+        ssl              => true,
+        vhost           => 'cocacola.local.com',
+        www_root        => '/www/cocacola.local.com',
+        location        => '~ \.php$',
+        index_files     => ['index.php'],
+        proxy           => undef,
+        fastcgi         => "127.0.0.1:9001",
+        fastcgi_script  => undef,
+        location_cfg_append => {
+            fastcgi_connect_timeout => '5h',
+            fastcgi_read_timeout    => '5h',
+            fastcgi_send_timeout    => '5h',
+            fastcgi_param    => "APPLICATION_ENV 'development'"
+        }
+    }
+}
 #### **** COMPOSER **** ###
 class pckgcomposer{
     require appsrv
@@ -238,6 +306,14 @@ class xdebug {
             xdebug.cli_color = 1",
     }
 }
+####**include mysqlserver *##
+class mysqlserver {
+    class { '::mysql::server':
+      root_password           => 'password',
+      remove_default_accounts => true,
+      override_options        => $override_options
+    }
+}
 ######*****Instalación de Node*****************##############################################
 class pckgnode{
     class { 'nodejs':
@@ -253,8 +329,11 @@ include pckgsextra
 include appsrv
 include zendloggergraylog
 include magento1
+include magento2
 include pckgmemcached
 include pckgnode
 #include pckgsass
 include pckgcomposer
 include xdebug
+include mysqlserver
+include cocacola
