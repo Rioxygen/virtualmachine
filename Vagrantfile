@@ -10,11 +10,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.vm.box_check_update = false
   #config.ssh.forward_agent = true
   config.vm.boot_timeout    = 900
-  config.vm.network "private_network", ip: "192.168.66.10"
+  config.vm.network "private_network", ip: "192.168.67.10"
   config.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--cpuexecutioncap", "20"]
+      vb.customize ["modifyvm", :id, "--cpuexecutioncap", "25"]
       vb.gui = false
-      vb.memory = "382"
+      vb.memory = "450"
   end
   #Wrapper
   config.vm.synced_folder "../WrapperGrayLogZendLogger", "/www/wrappergraylogzendlogger.local.com", disabled: (not FileTest::directory?("../WrapperGrayLogZendLogger"))

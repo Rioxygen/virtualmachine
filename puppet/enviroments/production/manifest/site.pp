@@ -72,7 +72,7 @@ class websrv{
 class appsrv {
     require yum::repo::remi
     #require yum::repo::epel
-    require yum::repo::remi_php56
+    require yum::repo::remi_php70
     # For the user to exist
     require websrv
     package { 'libtidy':
@@ -98,8 +98,8 @@ class appsrv {
         'pdo',
         'mysqlnd',
         'pgsql',
-        'pecl-mongo',
-        'pecl-sqlite',
+        #'pecl-mongo',
+        #'pecl-sqlite',
         'mbstring',
         'mcrypt',
         'xml',
@@ -202,8 +202,8 @@ class magento2 {
     require websrv
     require appsrv
 
-    nginx::resource::vhost { 'magentotraining2.local.com':
-        www_root                => '/www/magentotraining2.local.com',
+    nginx::resource::vhost { 'magento2training.local.com':
+        www_root                => '/www/magento2training.local.com/pub',
         ssl                     => true,
         ssl_cert                => '/vagrant/puppet/certs/server.crt',
         ssl_key                 => '/vagrant/puppet/certs/server.key',
@@ -216,8 +216,8 @@ class magento2 {
     nginx::resource::location { "magento2_root":
         ensure          => present,
         ssl              => true,
-        vhost           => 'magentotraining2.local.com',
-        www_root        => '/www/magentotraining2.local.com',
+        vhost           => 'magento2training.local.com',
+        www_root        => '/www/magento2training.local.com/pub',
         location        => '~ \.php$',
         index_files     => ['index.php'],
         proxy           => undef,
