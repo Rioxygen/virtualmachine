@@ -21,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #Magento1
   config.vm.synced_folder "../magentoTraining", "/www/magentotraining.local.com", disabled: (not FileTest::directory?("../magentoTraining"))
   #Magento2
-  config.vm.synced_folder "../magento2Training", "/www/magento2training.local.com", disabled: (not FileTest::directory?("../magento2Training"))
+  config.vm.synced_folder "../magento2Training", "/www/magento2training.local.com", disabled: (not FileTest::directory?("../magento2Training")), owner: "vagrant", group: "apache"
   #Magento2
   config.vm.synced_folder "../cocacola", "/www/cocacola.local.com", disabled: (not FileTest::directory?("../cocacola"))
   #Magento2

@@ -109,6 +109,7 @@ class appsrv {
         date_timezone               => 'America/Mexico_City',
         error_reporting             => 'E_ALL & ~E_DEPRECATED',
         display_errors              => 'On',
+        session_save_path           => '/tmp',
         html_errors                 => 'On'
     }
     file { '/var/log/httpd/www-error.log':
@@ -154,6 +155,7 @@ class magento2 {
         'Indexes',
         'MultiViews',
       ],
+      overrides => 'All'
     }
 
 }
