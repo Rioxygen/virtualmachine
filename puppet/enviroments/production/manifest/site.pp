@@ -18,9 +18,9 @@ class pckgsextra{
         group => "root",
         mode  => "644",
         content => "
-        192.168.66.10  www.wrappergraylogzendlogger.local.com
-        192.168.66.10  magentotraining.local.com
-        192.168.66.10  magento2training.local.com
+        192.168.67.10  www.wrappergraylogzendlogger.local.com
+        192.168.67.10  magentotraining.local.com
+        192.168.67.10  magento2training.local.com
         ",
     }
 }
@@ -42,19 +42,16 @@ class pckgmemcached {
 
 ##### ***** NGINX *** ###
 class websrv{
-    class { 'nginx': sendfile => off } #moved to hiera.yaml
-
-    user { "nginx":
-        ensure     => present,
-        gid        => "nginx",
-        groups     => ["vagrant","apache"],
-         # For the user to exist
-        require => [Group['nginx'],Group['vagrant']]
+    
+    class { 'apache':
+        default_vhost => true,
+        #mpm_module => 'prefork',
     }
+    #include ::apache::mod::php
     user { "vagrant":
         ensure     => present,
         gid        => "vagrant",
-        groups     => ["vagrant","nginx","apache"],
+        groups     => ["apache","vagrant","nginx"],
          # For the user to exist
         require => [Group['nginx'],Group['vagrant'],Group['apache']]
     }
@@ -64,17 +61,17 @@ class websrv{
     group {"vagrant":
         ensure     => present,
     }
-    group {"apache":
-        ensure     => present,
-    }
+    # group {"apache":
+    #    ensure     => present,
+    # }
 }
 ### PHP  ##
 class appsrv {
+    require websrv
     require yum::repo::remi
     #require yum::repo::epel
     require yum::repo::remi_php70
     # For the user to exist
-    require websrv
     package { 'libtidy':
         ensure  => present,
     }
@@ -84,82 +81,59 @@ class appsrv {
     package { 'php-tidy':
         ensure  => present,
     }
-    class { php::fpm::daemon:
-        log_owner => 'nginx',
-        log_group => 'nginx',
-        log_dir_mode => '0775',
+    class { 'php::mod_php5':
+        inifile => '/etc/httpd/conf.d/php.conf',
+        require => Package['httpd']
     }
-    php::fpm::conf { 'www':
-        listen  => '127.0.0.1:9001',
-        user    => 'nginx',
-    }
+    
     php::module { [ 'pecl-apcu',
         'pear',
         'pdo',
         'mysqlnd',
         'pgsql',
-        #'pecl-mongo',
-        #'pecl-sqlite',
+        'pecl-zip',
         'mbstring',
+        'intl',
         'mcrypt',
         'xml',
         'php-devel',
         'pecl-memcached',
         'gd',
         'soap']:
-        notify  => Service['php-fpm'],
     }
     php::ini { '/etc/php.ini':
         short_open_tag              => 'On',
+        memory_limit                => '1G',
+        max_execution_time          => '1800',
         asp_tags                    => 'Off',
-        date_timezone               =>'America/Mexico_City',
+        date_timezone               => 'America/Mexico_City',
         error_reporting             => 'E_ALL & ~E_DEPRECATED',
         display_errors              => 'On',
-        html_errors                 => 'On',
-        notify  => Service['php-fpm'],
+        html_errors                 => 'On'
     }
-    file { '/var/log/php-fpm/www-error.log':
+    file { '/var/log/httpd/www-error.log':
         ensure => "file",
-        owner  => "nginx",
-        group  => "nginx",
+        owner  => "apache",
+        group  => "apache",
         mode   => "777"
     }
-    file { '/var/log/php-fpm/error.log':
+    file { '/var/log/httpd/error.log':
         ensure => "file",
-        owner  => "nginx",
-        group  => "nginx",
+        owner  => "apache",
+        group  => "apache",
         mode   => "777"
     }
+    #only if you are using php7
+    exec { "install_php7":
+       path => "/usr/bin/",
+       command => "sudo cp /vagrant/php7/php.conf /etc/httpd/conf.d/php.conf"
+    }
+    
 }
 ##*************Configuracion Core Proeycto*************###
 class zendloggergraylog {
     require websrv
     require appsrv
-    nginx::resource::vhost { 'wrappergraylogzendlogger.local.com':
-        www_root            => '/www/wrappergraylogzendlogger.local.com',
-        ssl                 => true,
-        ssl_cert            => '/vagrant/puppet/certs/server.crt',
-        ssl_key             => '/vagrant/puppet/certs/server.key',
-        index_files         => [ 'index.php' ],
-        use_default_location => true
-    }
-    nginx::resource::location { "zendloggergraylog_root":
-        ensure          => present,
-        ssl             => true,
-        vhost           => 'wrappergraylogzendlogger.local.com',
-        www_root        => '/www/wrappergraylogzendlogger.local.com',
-        location        => '~ \.php$',
-        index_files     => ['index.php'],
-        proxy           => undef,
-        fastcgi         => "127.0.0.1:9001",
-        fastcgi_script  => undef,
-        location_cfg_append => {
-            fastcgi_connect_timeout => '5h',
-            fastcgi_read_timeout    => '5h',
-            fastcgi_send_timeout    => '5h',
-            fastcgi_param    => "APPLICATION_ENV 'development'"
-        }
-    }
     
 }
 
@@ -168,110 +142,33 @@ class magento1 {
     require websrv
     require appsrv
 
-    nginx::resource::vhost { 'magentotraining.local.com':
-        www_root                => '/www/magentotraining.local.com',
-        ssl                     => true,
-        ssl_cert                => '/vagrant/puppet/certs/server.crt',
-        ssl_key                 => '/vagrant/puppet/certs/server.key',
-        index_files             => [ 'index.php' ],
-        use_default_location    => true,
-        location_cfg_append => {
-            try_files => '$uri $uri/ /index.php$is_args$args'
-        }
-    }
-    nginx::resource::location { "magento1_root":
-        ensure          => present,
-        ssl              => true,
-        vhost           => 'magentotraining.local.com',
-        www_root        => '/www/magentotraining.local.com',
-        location        => '~ \.php$',
-        index_files     => ['index.php'],
-        proxy           => undef,
-        fastcgi         => "127.0.0.1:9001",
-        fastcgi_script  => undef,
-        location_cfg_append => {
-            fastcgi_connect_timeout => '5h',
-            fastcgi_read_timeout    => '5h',
-            fastcgi_send_timeout    => '5h',
-            fastcgi_param    => "APPLICATION_ENV 'development'"
-        }
-    }
+    
 }
 ##*************Magento 12********************************
 class magento2 {
     require websrv
-    require appsrv
+    apache::vhost { 'magento2training.local.com':
+      port    => '80',
+      docroot => '/www/magento2training.local.com',
+      options => [
+        'Indexes',
+        'MultiViews',
+      ],
+    }
 
-    nginx::resource::vhost { 'magento2training.local.com':
-        www_root                => '/www/magento2training.local.com/pub',
-        ssl                     => true,
-        ssl_cert                => '/vagrant/puppet/certs/server.crt',
-        ssl_key                 => '/vagrant/puppet/certs/server.key',
-        index_files             => [ 'index.php' ],
-        use_default_location    => true,
-        location_cfg_append => {
-            try_files => '$uri $uri/ /index.php$is_args$args'
-        }
-    }
-    nginx::resource::location { "magento2_root":
-        ensure          => present,
-        ssl              => true,
-        vhost           => 'magento2training.local.com',
-        www_root        => '/www/magento2training.local.com/pub',
-        location        => '~ \.php$',
-        index_files     => ['index.php'],
-        proxy           => undef,
-        fastcgi         => "127.0.0.1:9001",
-        fastcgi_script  => undef,
-        location_cfg_append => {
-            fastcgi_connect_timeout => '5h',
-            fastcgi_read_timeout    => '5h',
-            fastcgi_send_timeout    => '5h',
-            fastcgi_param    => "APPLICATION_ENV 'development'"
-        }
-    }
 }
 ##*************Magento 12********************************
 class cocacola {
     require websrv
     require appsrv
-
-    nginx::resource::vhost { 'cocacola.local.com':
-        www_root                => '/www/cocacola.local.com',
-        ssl                     => true,
-        ssl_cert                => '/vagrant/puppet/certs/server.crt',
-        ssl_key                 => '/vagrant/puppet/certs/server.key',
-        index_files             => [ 'index.php' ],
-        use_default_location    => true,
-        location_cfg_append => {
-            try_files => '$uri $uri/ /index.php$is_args$args'
-        }
-    }
-    nginx::resource::location { "cocacola_root":
-        ensure          => present,
-        ssl              => true,
-        vhost           => 'cocacola.local.com',
-        www_root        => '/www/cocacola.local.com',
-        location        => '~ \.php$',
-        index_files     => ['index.php'],
-        proxy           => undef,
-        fastcgi         => "127.0.0.1:9001",
-        fastcgi_script  => undef,
-        location_cfg_append => {
-            fastcgi_connect_timeout => '5h',
-            fastcgi_read_timeout    => '5h',
-            fastcgi_send_timeout    => '5h',
-            fastcgi_param    => "APPLICATION_ENV 'development'"
-        }
-    }
 }
 #### **** COMPOSER **** ###
 class pckgcomposer{
     require appsrv
     #asegura que este instalado el php antes de instalar composer
-    package { 'php':
-        ensure  => present,
-    }
+    #package { 'php':
+    #    ensure  => present,
+    #}
     class { '::composer':
         require => Package['php'],
         command_name => 'composer',
@@ -293,7 +190,7 @@ class xdebug {
     }->
     file { "/etc/php.d/15-xdebug.ini":
         ensure  => file,
-        notify  => Service['php-fpm'],
+        # notify  => Service['php-fpm'],
         content => "[xdebug]
             zend_extension=\"/usr/lib64/php/modules/xdebug.so\"
             xdebug.remote_enable = 1
@@ -309,9 +206,19 @@ class xdebug {
 ####**include mysqlserver *##
 class mysqlserver {
     class { '::mysql::server':
+      package_name            => 'mysql-server',
       root_password           => 'password',
+      service_name            => 'mysqld',
       remove_default_accounts => true,
-      override_options        => $override_options
+      override_options => {
+            mysqld => {
+                log-error => '/var/log/mysqld.log',
+                pid-file  => '/var/run/mysqld/mysqld.pid'
+            },
+            mysqld_safe => {
+                log-error => '/var/log/mysqld.log'
+            },
+        }
     }
 }
 ######*****Instalación de Node*****************##############################################
@@ -326,9 +233,10 @@ class pckgnode{
 
 ###
 include pckgsextra
-include appsrv
-include zendloggergraylog
-include magento1
+include websrv
+#include appsrv
+#include zendloggergraylog
+#include magento1
 include magento2
 include pckgmemcached
 include pckgnode
@@ -336,4 +244,4 @@ include pckgnode
 include pckgcomposer
 include xdebug
 include mysqlserver
-include cocacola
+#include cocacola

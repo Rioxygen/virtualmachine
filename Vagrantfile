@@ -14,7 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "virtualbox" do |vb|
       vb.customize ["modifyvm", :id, "--cpuexecutioncap", "25"]
       vb.gui = false
-      vb.memory = "450"
+      vb.memory = "1260"
   end
   #Wrapper
   config.vm.synced_folder "../WrapperGrayLogZendLogger", "/www/wrappergraylogzendlogger.local.com", disabled: (not FileTest::directory?("../WrapperGrayLogZendLogger"))
