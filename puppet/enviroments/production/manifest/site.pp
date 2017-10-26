@@ -155,7 +155,7 @@ class magento2 {
         'Indexes',
         'MultiViews',
       ],
-      overrides => 'All'
+      override => 'All'
     }
 
 }
